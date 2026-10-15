@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khách hàng · Shop</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header>
+    <h1><a href="/">Shop</a></h1>
+    <nav>
+        <a href="/customers">Khách hàng</a>
+        <a href="/products">Sản phẩm</a>
+        <a href="/orders">Đơn hàng</a>
+    </nav>
+    <div class="env">
+        <label for="baseUrl">API:</label>
+        <select id="baseUrl">
+            <option value="http://localhost:8088/api/v1">Backend :8088</option>
+            <option value="http://127.0.0.1:4010">Mock :4010</option>
+        </select>
+        <span id="envBadge" class="badge real">REAL API</span>
+    </div>
+</header>
+<main>
+    <h2 id="title">Thêm khách hàng</h2>
+    <div id="message" class="alert" hidden></div>
+    <form id="form" class="card">
+        <div class="field"><label for="fullName">Họ tên</label><input id="fullName" name="fullName" required></div>
+        <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" required></div>
+        <div class="field"><label for="phone">Điện thoại</label><input id="phone" name="phone" placeholder="0912345678"></div>
+        <div class="field"><label for="address">Địa chỉ</label><input id="address" name="address"></div>
+        <div class="actions">
+            <button type="submit" id="submit">Tạo khách hàng</button>
+            <a class="btn secondary" href="/customers">Hủy</a>
+        </div>
+    </form>
+</main>
+<script src="/common.js"></script>
+<script src="/pages/customer-form.js"></script>
+</body>
+</html>

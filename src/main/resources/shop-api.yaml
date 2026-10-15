@@ -1,0 +1,919 @@
+openapi: 3.0.3
+info:
+  title: Shop API
+  description: |
+    RESTful API quản lý hoạt động kinh doanh trực tuyến gồm 3 tài nguyên chính:
+    **Khách hàng** (`/customers`), **Sản phẩm** (`/products`) và **Đơn hàng** (`/orders`).
+
+    Quy ước chung:
+    - URL dùng danh từ số nhiều, kebab-case, lồng nhau tối đa 2 cấp.
+    - Danh sách hỗ trợ phân trang `?page=0&size=10&sort=price,desc`.
+    - Mọi lỗi trả về cùng một cấu trúc `ErrorResponse` (`code`, `message`, `details`).
+  version: 1.0.0
+  contact:
+    name: Shop API Team
+    email: shop-api@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: http://localhost:8088/api/v1
+    description: Spring Boot backend (local)
+  - url: http://localhost:4010
+    description: Prism Mock Server
+tags:
+  - name: Customers
+    description: Quản lý hồ sơ khách hàng
+  - name: Products
+    description: Quản lý danh mục sản phẩm và tồn kho
+  - name: Orders
+    description: Đặt hàng, tính tổng tiền và cập nhật trạng thái đơn hàng
+
+paths:
+  /customers:
+    get:
+      tags: [Customers]
+      summary: Lấy danh sách khách hàng (có phân trang)
+      operationId: listCustomers
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - name: keyword
+          in: query
+          description: Tìm theo họ tên hoặc email (không phân biệt hoa thường)
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+          example: nguyen
+      responses:
+        '200':
+          description: Danh sách khách hàng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    post:
+      tags: [Customers]
+      summary: Tạo mới khách hàng
+      operationId: createCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+      responses:
+        '201':
+          description: Tạo khách hàng thành công
+          headers:
+            Location:
+              $ref: '#/components/headers/Location'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /customers/{customerId}:
+    parameters:
+      - $ref: '#/components/parameters/CustomerId'
+    get:
+      tags: [Customers]
+      summary: Xem chi tiết khách hàng
+      operationId: getCustomerById
+      responses:
+        '200':
+          description: Thông tin khách hàng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Customers]
+      summary: Cập nhật toàn bộ thông tin khách hàng
+      operationId: replaceCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    patch:
+      tags: [Customers]
+      summary: Cập nhật một phần thông tin khách hàng
+      operationId: updateCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerPatchRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      tags: [Customers]
+      summary: Xóa khách hàng (chỉ khi chưa có đơn hàng)
+      operationId: deleteCustomer
+      responses:
+        '204':
+          description: Xóa thành công
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /customers/{customerId}/orders:
+    parameters:
+      - $ref: '#/components/parameters/CustomerId'
+    get:
+      tags: [Customers]
+      summary: Lịch sử đơn hàng của một khách hàng
+      operationId: listCustomerOrders
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+      responses:
+        '200':
+          description: Danh sách đơn hàng của khách hàng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /products:
+    get:
+      tags: [Products]
+      summary: Lấy danh sách sản phẩm (có phân trang, lọc)
+      operationId: listProducts
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - name: keyword
+          in: query
+          description: Tìm theo tên sản phẩm
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+          example: iphone
+        - name: category
+          in: query
+          description: Lọc theo danh mục
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+          example: Smartphone
+      responses:
+        '200':
+          description: Danh sách sản phẩm
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    post:
+      tags: [Products]
+      summary: Tạo mới sản phẩm
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductRequest'
+      responses:
+        '201':
+          description: Tạo sản phẩm thành công
+          headers:
+            Location:
+              $ref: '#/components/headers/Location'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /products/{productId}:
+    parameters:
+      - $ref: '#/components/parameters/ProductId'
+    get:
+      tags: [Products]
+      summary: Xem chi tiết sản phẩm
+      operationId: getProductById
+      responses:
+        '200':
+          description: Thông tin sản phẩm
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Products]
+      summary: Cập nhật toàn bộ thông tin sản phẩm
+      operationId: replaceProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Products]
+      summary: Cập nhật một phần sản phẩm (giá, tồn kho...)
+      operationId: updateProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductPatchRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Products]
+      summary: Xóa sản phẩm (chỉ khi chưa nằm trong đơn hàng nào)
+      operationId: deleteProduct
+      responses:
+        '204':
+          description: Xóa thành công
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /orders:
+    get:
+      tags: [Orders]
+      summary: Lấy danh sách đơn hàng (có phân trang, lọc theo trạng thái)
+      operationId: listOrders
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+        - name: status
+          in: query
+          description: Lọc theo trạng thái đơn hàng
+          required: false
+          schema:
+            $ref: '#/components/schemas/OrderStatus'
+      responses:
+        '200':
+          description: Danh sách đơn hàng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    post:
+      tags: [Orders]
+      summary: Đặt hàng (tự động tính tổng tiền và trừ tồn kho)
+      operationId: createOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequest'
+      responses:
+        '201':
+          description: Đặt hàng thành công
+          headers:
+            Location:
+              $ref: '#/components/headers/Location'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /orders/{orderId}:
+    parameters:
+      - $ref: '#/components/parameters/OrderId'
+    get:
+      tags: [Orders]
+      summary: Xem chi tiết đơn hàng
+      operationId: getOrderById
+      responses:
+        '200':
+          description: Thông tin đơn hàng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Orders]
+      summary: Cập nhật trạng thái đơn hàng
+      description: |
+        Luồng trạng thái hợp lệ:
+        `PENDING -> CONFIRMED -> SHIPPING -> DELIVERED`.
+        Có thể `CANCELLED` khi đơn đang `PENDING` hoặc `CONFIRMED` (hoàn lại tồn kho).
+      operationId: updateOrderStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderStatusUpdateRequest'
+      responses:
+        '200':
+          description: Cập nhật trạng thái thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      tags: [Orders]
+      summary: Xóa đơn hàng (chỉ khi PENDING hoặc CANCELLED)
+      operationId: deleteOrder
+      responses:
+        '204':
+          description: Xóa thành công
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+components:
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: Số trang (bắt đầu từ 0)
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        default: 0
+    Size:
+      name: size
+      in: query
+      description: Số phần tử mỗi trang (1 - 100)
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 100
+        default: 10
+    Sort:
+      name: sort
+      in: query
+      description: Sắp xếp theo dạng `field,asc|desc` (ví dụ `price,desc`)
+      required: false
+      schema:
+        type: string
+        pattern: '^[a-zA-Z]+(,(asc|desc|ASC|DESC))?$'
+        default: id,asc
+      example: id,desc
+    CustomerId:
+      name: customerId
+      in: path
+      required: true
+      description: ID khách hàng
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+      example: 1
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      description: ID sản phẩm
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+      example: 1
+    OrderId:
+      name: orderId
+      in: path
+      required: true
+      description: ID đơn hàng
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+      example: 1
+
+  headers:
+    Location:
+      description: URL của tài nguyên vừa được tạo
+      schema:
+        type: string
+        format: uri
+      example: http://localhost:8080/api/v1/customers/1
+
+  responses:
+    BadRequest:
+      description: Dữ liệu đầu vào không hợp lệ (lỗi Validation)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 400
+            code: VALIDATION_FAILED
+            message: Dữ liệu đầu vào không hợp lệ
+            details:
+              - field: email
+                message: must be a well-formed email address
+            path: /api/v1/customers
+            timestamp: '2026-10-14T10:00:00Z'
+    NotFound:
+      description: Không tìm thấy tài nguyên
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 404
+            code: RESOURCE_NOT_FOUND
+            message: Không tìm thấy khách hàng với id = 99
+            details: []
+            path: /api/v1/customers/99
+            timestamp: '2026-10-14T10:00:00Z'
+    UnprocessableEntity:
+      description: Vi phạm quy tắc nghiệp vụ
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 422
+            code: INSUFFICIENT_STOCK
+            message: 'Sản phẩm "iPhone 16" chỉ còn 2 trong kho'
+            details:
+              - field: items[0].quantity
+                message: Số lượng yêu cầu 5 vượt quá tồn kho 2
+            path: /api/v1/orders
+            timestamp: '2026-10-14T10:00:00Z'
+
+  schemas:
+    # ---------- Customer ----------
+    CustomerRequest:
+      type: object
+      description: Dữ liệu tạo mới / cập nhật toàn bộ khách hàng
+      required: [fullName, email]
+      properties:
+        fullName:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: Nguyễn Văn An
+        email:
+          type: string
+          format: email
+          maxLength: 150
+          example: an.nguyen@example.com
+        phone:
+          type: string
+          pattern: '^\+?[0-9]{9,15}$'
+          example: '0912345678'
+        address:
+          type: string
+          maxLength: 255
+          example: 8 Tôn Thất Thuyết, Cầu Giấy, Hà Nội
+    CustomerPatchRequest:
+      type: object
+      description: Chỉ gửi các trường cần thay đổi
+      properties:
+        fullName:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: Nguyễn Văn Bình
+        email:
+          type: string
+          format: email
+          maxLength: 150
+          example: binh.nguyen@example.com
+        phone:
+          type: string
+          pattern: '^\+?[0-9]{9,15}$'
+          example: '0987654321'
+        address:
+          type: string
+          maxLength: 255
+          example: 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội
+    CustomerResponse:
+      type: object
+      required: [id, fullName, email]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        fullName:
+          type: string
+          example: Nguyễn Văn An
+        email:
+          type: string
+          format: email
+          example: an.nguyen@example.com
+        phone:
+          type: string
+          example: '0912345678'
+        address:
+          type: string
+          example: 8 Tôn Thất Thuyết, Cầu Giấy, Hà Nội
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-10-14T10:00:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2026-10-14T10:00:00Z'
+    CustomerPage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerResponse'
+        page:
+          type: integer
+          format: int32
+          example: 0
+        size:
+          type: integer
+          format: int32
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          example: 1
+        totalPages:
+          type: integer
+          format: int32
+          example: 1
+
+    # ---------- Product ----------
+    ProductRequest:
+      type: object
+      description: Dữ liệu tạo mới / cập nhật toàn bộ sản phẩm
+      required: [name, price, stockQuantity]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 150
+          example: iPhone 16
+        description:
+          type: string
+          maxLength: 1000
+          example: Điện thoại Apple iPhone 16 128GB
+        category:
+          type: string
+          maxLength: 100
+          example: Smartphone
+        price:
+          type: number
+          minimum: 0
+          example: 22990000
+        stockQuantity:
+          type: integer
+          format: int32
+          minimum: 0
+          example: 50
+    ProductPatchRequest:
+      type: object
+      description: Chỉ gửi các trường cần thay đổi
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 150
+          example: iPhone 16 Pro
+        description:
+          type: string
+          maxLength: 1000
+          example: Điện thoại Apple iPhone 16 Pro 256GB
+        category:
+          type: string
+          maxLength: 100
+          example: Smartphone
+        price:
+          type: number
+          minimum: 0
+          example: 27990000
+        stockQuantity:
+          type: integer
+          format: int32
+          minimum: 0
+          example: 30
+    ProductResponse:
+      type: object
+      required: [id, name, price, stockQuantity]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: iPhone 16
+        description:
+          type: string
+          example: Điện thoại Apple iPhone 16 128GB
+        category:
+          type: string
+          example: Smartphone
+        price:
+          type: number
+          example: 22990000
+        stockQuantity:
+          type: integer
+          format: int32
+          example: 50
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-10-14T10:00:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2026-10-14T10:00:00Z'
+    ProductPage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductResponse'
+        page:
+          type: integer
+          format: int32
+          example: 0
+        size:
+          type: integer
+          format: int32
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          example: 1
+        totalPages:
+          type: integer
+          format: int32
+          example: 1
+
+    # ---------- Order ----------
+    OrderStatus:
+      type: string
+      description: Trạng thái đơn hàng
+      enum: [PENDING, CONFIRMED, SHIPPING, DELIVERED, CANCELLED]
+      example: PENDING
+    OrderItemRequest:
+      type: object
+      required: [productId, quantity]
+      properties:
+        productId:
+          type: integer
+          format: int64
+          minimum: 1
+          example: 1
+        quantity:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1000
+          example: 2
+    OrderCreateRequest:
+      type: object
+      required: [customerId, items]
+      properties:
+        customerId:
+          type: integer
+          format: int64
+          minimum: 1
+          example: 1
+        shippingAddress:
+          type: string
+          maxLength: 255
+          description: Bỏ trống để dùng địa chỉ của khách hàng
+          example: 8 Tôn Thất Thuyết, Cầu Giấy, Hà Nội
+        note:
+          type: string
+          maxLength: 500
+          example: Giao giờ hành chính
+        items:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/OrderItemRequest'
+    OrderStatusUpdateRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+    OrderItemResponse:
+      type: object
+      required: [id, productId, productName, unitPrice, quantity, lineTotal]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        productId:
+          type: integer
+          format: int64
+          example: 1
+        productName:
+          type: string
+          example: iPhone 16
+        unitPrice:
+          type: number
+          example: 22990000
+        quantity:
+          type: integer
+          format: int32
+          example: 2
+        lineTotal:
+          type: number
+          example: 45980000
+    OrderResponse:
+      type: object
+      required: [id, customerId, status, totalAmount, items]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        customerId:
+          type: integer
+          format: int64
+          example: 1
+        customerName:
+          type: string
+          example: Nguyễn Văn An
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        shippingAddress:
+          type: string
+          example: 8 Tôn Thất Thuyết, Cầu Giấy, Hà Nội
+        note:
+          type: string
+          example: Giao giờ hành chính
+        totalAmount:
+          type: number
+          example: 45980000
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemResponse'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-10-14T10:00:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2026-10-14T10:00:00Z'
+    OrderPage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderResponse'
+        page:
+          type: integer
+          format: int32
+          example: 0
+        size:
+          type: integer
+          format: int32
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          example: 1
+        totalPages:
+          type: integer
+          format: int32
+          example: 1
+
+    # ---------- Error ----------
+    FieldError:
+      type: object
+      required: [message]
+      properties:
+        field:
+          type: string
+          example: email
+        message:
+          type: string
+          example: must be a well-formed email address
+    ErrorResponse:
+      type: object
+      description: Cấu trúc lỗi thống nhất cho toàn bộ API
+      required: [status, code, message, details]
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 400
+        code:
+          type: string
+          description: Mã lỗi dạng máy đọc được
+          example: VALIDATION_FAILED
+        message:
+          type: string
+          example: Dữ liệu đầu vào không hợp lệ
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldError'
+        path:
+          type: string
+          example: /api/v1/customers
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-10-14T10:00:00Z'

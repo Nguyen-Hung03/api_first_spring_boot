@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đơn hàng · Shop</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header>
+    <h1><a href="/">Shop</a></h1>
+    <nav>
+        <a href="/customers">Khách hàng</a>
+        <a href="/products">Sản phẩm</a>
+        <a href="/orders">Đơn hàng</a>
+    </nav>
+    <div class="env">
+        <label for="baseUrl">API:</label>
+        <select id="baseUrl">
+            <option value="http://localhost:8088/api/v1">Backend :8088</option>
+            <option value="http://127.0.0.1:4010">Mock :4010</option>
+        </select>
+        <span id="envBadge" class="badge real">REAL API</span>
+    </div>
+</header>
+<main>
+    <div class="heading">
+        <div>
+            <p class="eyebrow">Đơn hàng</p>
+            <h2>Danh sách đơn hàng</h2>
+            <p class="lead">Theo dõi tổng tiền và trạng thái giao hàng.</p>
+        </div>
+        <a class="btn" href="/orders/new">Đặt hàng</a>
+    </div>
+    <div id="message" class="alert" hidden></div>
+    <div id="summary" class="stats"></div>
+    <form id="filter" class="toolbar">
+        <select id="status">
+            <option value="">Tất cả trạng thái</option>
+            <option>PENDING</option>
+            <option>CONFIRMED</option>
+            <option>SHIPPING</option>
+            <option>DELIVERED</option>
+            <option>CANCELLED</option>
+        </select>
+        <button type="submit">Lọc</button>
+    </form>
+    <div class="table-wrap">
+    <table>
+        <thead><tr><th>ID</th><th>Khách hàng</th><th>Sản phẩm</th><th class="num">Tổng tiền</th><th>Trạng thái</th><th></th></tr></thead>
+        <tbody id="rows"></tbody>
+    </table>
+    </div>
+    <div id="pager" class="pager"></div>
+</main>
+<script src="/common.js"></script>
+<script src="/pages/orders.js"></script>
+</body>
+</html>

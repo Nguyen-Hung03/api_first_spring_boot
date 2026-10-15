@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop · Trang chủ</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header>
+    <h1><a href="/">Shop</a></h1>
+    <nav>
+        <a href="/customers">Khách hàng</a>
+        <a href="/products">Sản phẩm</a>
+        <a href="/orders">Đơn hàng</a>
+    </nav>
+    <div class="env">
+        <label for="baseUrl">API:</label>
+        <select id="baseUrl">
+            <option value="http://localhost:8088/api/v1">Backend :8088</option>
+            <option value="http://127.0.0.1:4010">Mock :4010</option>
+        </select>
+        <span id="envBadge" class="badge real">REAL API</span>
+    </div>
+</header>
+<main>
+    <section class="hero">
+        <p class="eyebrow">Shop Admin</p>
+        <h2>Quản lý cửa hàng</h2>
+        <p class="lead">Xem khách hàng, sản phẩm và đơn hàng thành trang. Dữ liệu vẫn lấy từ API.</p>
+        <div id="stats" class="stats"></div>
+    </section>
+    <div class="grid">
+        <a class="tile" href="/customers">
+            <span class="tile-mark">KH</span>
+            <h3>Khách hàng</h3>
+            <p>Hồ sơ, địa chỉ và các đơn đã đặt.</p>
+            <span class="tile-go">Mở danh sách →</span>
+        </a>
+        <a class="tile" href="/products">
+            <span class="tile-mark">SP</span>
+            <h3>Sản phẩm</h3>
+            <p>Giá bán, danh mục và số lượng còn trong kho.</p>
+            <span class="tile-go">Mở danh sách →</span>
+        </a>
+        <a class="tile" href="/orders">
+            <span class="tile-mark">ĐH</span>
+            <h3>Đơn hàng</h3>
+            <p>Tổng tiền, sản phẩm trong đơn và trạng thái giao.</p>
+            <span class="tile-go">Mở danh sách →</span>
+        </a>
+    </div>
+</main>
+<script src="/common.js"></script>
+<script src="/pages/home.js"></script>
+</body>
+</html>

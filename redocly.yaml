@@ -1,0 +1,7 @@
+extends:
+  - recommended
+rules:
+  # The assignment has no authentication requirement.
+  security-defined: off
+  # The assignment requires the local servers http://localhost:8080/api/v1 and the Prism mock.
+  no-server-example.com: off

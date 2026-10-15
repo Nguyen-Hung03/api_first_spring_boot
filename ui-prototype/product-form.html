@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sản phẩm · Shop</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header>
+    <h1><a href="/">Shop</a></h1>
+    <nav>
+        <a href="/customers">Khách hàng</a>
+        <a href="/products">Sản phẩm</a>
+        <a href="/orders">Đơn hàng</a>
+    </nav>
+    <div class="env">
+        <label for="baseUrl">API:</label>
+        <select id="baseUrl">
+            <option value="http://localhost:8088/api/v1">Backend :8088</option>
+            <option value="http://127.0.0.1:4010">Mock :4010</option>
+        </select>
+        <span id="envBadge" class="badge real">REAL API</span>
+    </div>
+</header>
+<main>
+    <h2 id="title">Thêm sản phẩm</h2>
+    <div id="message" class="alert" hidden></div>
+    <form id="form" class="card">
+        <div class="field"><label for="name">Tên</label><input id="name" name="name" required></div>
+        <div class="field"><label for="category">Danh mục</label><input id="category" name="category"></div>
+        <div class="field"><label for="price">Giá</label><input id="price" name="price" type="number" min="0" required></div>
+        <div class="field"><label for="stockQuantity">Tồn kho</label><input id="stockQuantity" name="stockQuantity" type="number" min="0" required></div>
+        <div class="field"><label for="description">Mô tả</label><textarea id="description" name="description" rows="3"></textarea></div>
+        <div class="actions">
+            <button type="submit" id="submit">Tạo sản phẩm</button>
+            <a class="btn secondary" href="/products">Hủy</a>
+        </div>
+    </form>
+</main>
+<script src="/common.js"></script>
+<script src="/pages/product-form.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "shop-api-tooling",
+  "private": true,
+  "description": "Mock server (Prism) và UI prototype cho Shop API",
+  "scripts": {
+    "lint:api": "npx --yes @redocly/cli@latest lint src/main/resources/shop-api.yaml",
+    "mock": "prism mock src/main/resources/shop-api.yaml --port 4010",
+    "mock:dynamic": "prism mock src/main/resources/shop-api.yaml --port 4010 --dynamic",
+    "ui": "node ui-prototype/server.js"
+  },
+  "devDependencies": {
+    "@stoplight/prism-cli": "^5.14.2",
+    "http-server": "^14.1.1"
+  }
+}

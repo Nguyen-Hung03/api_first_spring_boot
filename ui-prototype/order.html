@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đơn hàng · Shop</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header>
+    <h1><a href="/">Shop</a></h1>
+    <nav>
+        <a href="/customers">Khách hàng</a>
+        <a href="/products">Sản phẩm</a>
+        <a href="/orders">Đơn hàng</a>
+    </nav>
+    <div class="env">
+        <label for="baseUrl">API:</label>
+        <select id="baseUrl">
+            <option value="http://localhost:8088/api/v1">Backend :8088</option>
+            <option value="http://127.0.0.1:4010">Mock :4010</option>
+        </select>
+        <span id="envBadge" class="badge real">REAL API</span>
+    </div>
+</header>
+<main>
+    <div class="heading">
+        <h2 id="title">Đơn hàng</h2>
+        <button class="danger" id="remove" type="button">Xóa</button>
+    </div>
+    <div id="message" class="alert" hidden></div>
+    <dl class="card" id="info"></dl>
+    <h3>Sản phẩm</h3>
+    <div class="table-wrap">
+    <table>
+        <thead><tr><th>Tên</th><th class="num">Đơn giá</th><th class="num">Số lượng</th><th class="num">Thành tiền</th></tr></thead>
+        <tbody id="items"></tbody>
+    </table>
+    </div>
+    <div id="statusActions" class="actions"></div>
+</main>
+<script src="/common.js"></script>
+<script src="/pages/order.js"></script>
+</body>
+</html>
